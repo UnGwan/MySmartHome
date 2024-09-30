@@ -25,3 +25,10 @@ def led_control(request):
     
     # POST 요청이 아닌 경우
     return JsonResponse({'status': 'failed', 'message': '잘못된 요청입니다.'})
+
+@csrf_exempt
+def get_led_status(request):
+    if led.is_lit:
+        return JsonResponse({'status': 'on', 'message': 'LED가 켜져 있습니다.'})
+    else:
+        return JsonResponse({'status': 'off', 'message': 'LED가 꺼져 있습니다.'})
