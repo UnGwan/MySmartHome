@@ -1,3 +1,5 @@
+
+import subprocess
 from django.shortcuts import render
 
 # views.py
@@ -8,6 +10,32 @@ from gpiozero import LED
 # GPIO 12번 핀에 연결된 LED 객체 생성
 led = LED(12)
 
+@csrf_exempt
+def circulator_control(requset):
+    key_mapping = {
+        "P": "KEY_POWER",
+        "U": "KEY_U",
+        "D": "KEY_D",
+        "M": "KEY_M",
+        "T": "KEY_T",
+        "A": "KEY_A",
+        "G": "KEY_G",
+        "S": "KEY_S"
+    }
+    if requset.method == "POST":
+        action = requset.POST.get("action",'')
+        
+        if action in key_mapping:
+            try: 
+                subprocess.run(["irsend","SEND_ONCE","power",key_mapping[action]], check = True)
+                return JsonResponse({'status': 'success', 'message': f'Circulator turned {key_mapping[action]}'})
+            except subprocess.CalledProcessError as e :
+                return JsonResponse({'status': 'error', 'message': 'Failed to control the circulator'})
+        else:
+            return JsonResponse({'status': 'error', 'message': "Invalid mode provided. Please enter a valid mode."})
+    
+
+#led 제어 
 @csrf_exempt
 def led_control(request):
     if request.method == 'POST':
