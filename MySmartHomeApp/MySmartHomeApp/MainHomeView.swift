@@ -37,6 +37,22 @@ struct MainHomeView: View {
                         .cornerRadius(12)
                         .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 5)
                     }
+                    
+                    NavigationLink(destination: FanControlView()) {
+                        HStack {
+                            Image(systemName: "wind")
+                                .font(.title2)
+                                .foregroundColor(.yellow)
+                            Text("Fan Control")
+                                .fontWeight(.semibold)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.black.opacity(0.3)) // 버튼 배경 강화
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 5)
+                    }
 
                     // 향후 추가될 버튼 예시
                     Button(action: {
