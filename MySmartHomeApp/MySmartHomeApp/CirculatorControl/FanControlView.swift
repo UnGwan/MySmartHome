@@ -4,181 +4,146 @@ struct FanControlView: View {
     @EnvironmentObject private var viewModel: FanControlViewModel
     @State private var showResetAlert = false // 리셋 경고 알림 상태
     
+    let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+    
     var body: some View {
         ZStack {
-            // 전원 상태에 따라 배경색 변경
+            // 배경색
             LinearGradient(
                 gradient: Gradient(colors: viewModel.isFanOn
-                                   ? [Color.white.opacity(0.95), Color(UIColor.systemGray6)] // 밝은 흰색 계열
-                                   : [Color.black.opacity(0.85), Color(UIColor.systemGray4)] // 어두운 검은색 계열
-                ),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                                   ? [Color.blue.opacity(0.6), Color.purple.opacity(0.3)]
+                                   : [Color.black.opacity(0.8), Color.gray.opacity(0.5)]),
+                startPoint: .top,
+                endPoint: .bottom
             )
             .ignoresSafeArea()
             
             VStack(spacing: 20) {
-                // 상단 섹션: 팬 상태
                 VStack {
                     Text("서큘레이터 리모콘")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(viewModel.isFanOn ? .black : .gray)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(viewModel.isFanOn ? .primary : .gray)
                         .padding(.bottom, 10)
                     
-                    // 팬 속도 중앙 강조, 모드/각도/타이머를 좌우에 배치
-                    HStack {
-                        Spacer()
-                        
-                        VStack {
-                            Text("Mode")
-                                .foregroundColor(.black)
-                            Text(viewModel.windMode)
-                                .foregroundColor(viewModel.isFanOn ? .green : .gray)
-                            Image(systemName: "arrow.up.arrow.down.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30) // 아이콘 확대
-                                .foregroundColor(.blue)
-                                .padding(.top, 5)
-                                .opacity(viewModel.isUpDownMode ? 1 : 0.0)
+                    HStack(spacing: 20) {
+                        // 감소 버튼
+                        Button(action: { viewModel.decreaseSpeed() }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.system(size: 30, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60) // 동일한 크기 설정
+                                .background(Color.blue)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                         }
+                        .accessibilityLabel("속도 감소")
                         
-                        Spacer()
-                        
+                        // 바람 세기 텍스트
                         VStack {
-                            Text("speed")
-                                .fontWeight(.light)
-                                .opacity(viewModel.isFanOn ? 1.0 : 0.0)
+                            Text("Speed")
+                                .font(.headline)
+                                .foregroundColor(.gray)
                             Text("\(viewModel.fanSpeed)")
-                                .font(.system(size: 100))
-                                .fontWeight(.bold)
-                                .foregroundColor(.black)
-                                .opacity(viewModel.isFanOn ? 1.0 : 0.0)
-                            if viewModel.isLeftRightMode, let angle = viewModel.rotationAngle {
-                                Text("Angle: \(angle)")
-                            }
+                                .font(.system(size: 40, weight: .bold)) // 스피드 텍스트 크기 증가
+                                .foregroundColor(.blue)
                         }
+                        .frame(width: 120) // 텍스트 영역 고정
                         
-                        Spacer()
-                        
-                        VStack {
-                            Text("Timer")
-                                .foregroundColor(.black)
-                            Text(viewModel.timerSetting)
-                                .foregroundColor(viewModel.isFanOn ? .orange : .gray)
-                            Image(systemName: "arrow.left.arrow.right.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30) // 아이콘 확대
-                                .foregroundColor(.red)
-                                .padding(.top, 5)
-                                .opacity(viewModel.isLeftRightMode ? 1 : 0.0)
+                        // 증가 버튼
+                        Button(action: { viewModel.increaseSpeed() }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 30, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60) // 동일한 크기 설정
+                                .background(Color.purple)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                         }
-                        
-                        Spacer()
+                        .accessibilityLabel("속도 증가")
                     }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .opacity(viewModel.isFanOn ? 1.0 : 0.0)
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.isFanOn)
+                    
+                    // 상태 정보 그리드
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        InfoCard(title: "모드", value: viewModel.windMode, color: .blue)
+                        InfoCard(title: "각도", value: "\(viewModel.rotationAngle)°", color: .purple)
+                        InfoCard(title: "타이머", value: viewModel.timerSetting, color: .orange)
+                        InfoCard(title: "방 온도", value: String(format: "%.1f°C", viewModel.temperature), color: .red)
+                        InfoCard(title: "방 습도", value: String(format: "%.1f%%", viewModel.humidity), color: .green)
+                        InfoCard(title: "내 체온", value: String(format: "%.1f°C", viewModel.temperature), color: .pink)
+                    }
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(.systemGray6)))
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .opacity(viewModel.isFanOn ? 1.0 : 0.0)
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.isFanOn)
                 }
-                .padding()
-                
-                Spacer() // 상태 영역과 버튼 영역 사이 간격 유지
                 
                 VStack(spacing: 15) {
                     // 전원 버튼
                     Button(action: { viewModel.toggleFanPower() }) {
-                        Label(viewModel.isFanOn ? "Power Off" : "Power On", systemImage: "power")
-                            .font(.title2)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(viewModel.isFanOn ? Color.green : Color.red)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+                        HStack {
+                            Image(systemName: "power")
+                            Text(viewModel.isFanOn ? "Power Off" : "Power On")
+                        }
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(viewModel.isFanOn ? Color.green : Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
                     }
+                    .accessibilityLabel(viewModel.isFanOn ? "전원 끄기" : "전원 켜기")
                     
                     if viewModel.isFanOn {
-                        // 바람 세기 조절
-                        HStack {
-                            Button(action: { viewModel.decreaseSpeed() }) {
-                                Label("-", systemImage: "minus.circle")
-                                    .font(.title2)
-                                    .padding()
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(12)
+                        VStack(spacing: 10) {
+                            HStack(spacing: 10) {
+                                ModeButton(title: "온/습도 모드", isActive: viewModel.isSmartMode, action: { viewModel.toggleSmartMode() }, color: .blue)
+                                
+                                ModeButton(title: "체온 모드", isActive: false, action: { }, color: .purple)
                             }
-                            Text("Speed")
-                                .foregroundColor(.white)
-                            Button(action: { viewModel.increaseSpeed() }) {
-                                Label("+", systemImage: "plus.circle")
-                                    .font(.title2)
-                                    .padding()
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(12)
+                            
+                            HStack(spacing: 10) {
+                                FunctionButton(title: "Wind Mode", systemImage: "wind", color: .blue.opacity(0.2), action: { viewModel.cycleWindMode() }, isActive: true)
+                                
+                                FunctionButton(title: "Timer", systemImage: "timer", color: .yellow.opacity(0.2), action: { viewModel.cycleTimer() }, isActive: true)
                             }
-                        }
-                        
-                        // 바람 모드 버튼
-                        Button(action: { viewModel.cycleWindMode() }) {
-                            Label("Wind Mode", systemImage: "wind")
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.blue.opacity(0.2))
-                                .foregroundColor(.blue)
-                                .cornerRadius(12)
-                        }
-                        
-                        HStack {
-                            Button(action: { viewModel.toggleUpDownRotation() }) {
-                                Label("Up/Down", systemImage: "arrow.up.arrow.down.circle.fill")
-                                    .padding()
-                                    .background(Color.blue.opacity(0.2))
-                                    .foregroundColor(.blue)
-                                    .cornerRadius(12)
+                            
+                            HStack(spacing: 10) {
+                                FunctionButton(title: "상/하", systemImage: "arrow.up.arrow.down.circle.fill", color: .blue.opacity(0.2), action: { viewModel.toggleUpDownRotation() }, isActive: viewModel.isUpDownMode)
+                                
+                                FunctionButton(title: "좌/우", systemImage: "arrow.left.arrow.right.circle.fill", color: .red.opacity(0.2), action: { viewModel.toggleLeftRightRotation() }, isActive: viewModel.isLeftRightMode)
+                                
+                                FunctionButton(title: "각도", systemImage: "rotate.3d", color: Color.purple.opacity(0.2), action: { viewModel.adjustAngle() }, isActive: viewModel.isLeftRightMode)
                             }
-                            Button(action: { viewModel.toggleLeftRightRotation() }) {
-                                Label("Left/Right", systemImage: "arrow.left.arrow.right.circle.fill")
-                                    .padding()
-                                    .background(Color.red.opacity(0.2))
-                                    .foregroundColor(.red)
-                                    .cornerRadius(12)
-                            }
-                            if viewModel.isLeftRightMode {
-                                Button(action: { viewModel.adjustAngle() }) {
-                                    Label("Adjust Angle", systemImage: "rotate.3d")
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.purple.opacity(0.2))
-                                        .foregroundColor(.purple)
-                                        .cornerRadius(12)
-                                }
-                            }
-                        }
-                        
-                        Button(action: { viewModel.cycleTimer() }) {
-                            Label("Timer", systemImage: "timer")
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.yellow.opacity(0.2))
-                                .foregroundColor(.yellow)
-                                .cornerRadius(12)
-                        }
-                        
-                        Button(action: { viewModel.toggleFanLED() }) {
-                            Label("LED", systemImage: viewModel.isLedOn ? "lightbulb.fill" : "lightbulb")
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.blue.opacity(0.2))
-                                .foregroundColor(.blue)
-                                .cornerRadius(12)
                         }
                     }
                     
-                    // 데이터 리셋 버튼
                     if !viewModel.isFanOn {
                         Button(action: { showResetAlert = true }) {
-                            Label("Reset Data", systemImage: "exclamationmark.triangle.fill")
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                Text("Reset Data")
+                            }
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
                         }
                         .alert(isPresented: $showResetAlert) {
                             Alert(
@@ -193,10 +158,83 @@ struct FanControlView: View {
                     }
                 }
                 .padding()
-                .frame(maxWidth: .infinity)
-                
-                Spacer() // 상태 표시와 버튼 섹션 분리
             }
+            .padding()
+        }
+        .onAppear {
+            if viewModel.smartModeTimer == nil {
+                viewModel.getTempHum()
+            }
+        }
+    }
+    
+    // 정보 카드 뷰
+    struct InfoCard: View {
+        let title: String
+        let value: String
+        let color: Color
+        
+        var body: some View {
+            VStack {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.gray)
+                Text(value)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(color)
+            }
+            .frame(width: 100, height: 80)
+            .background(RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemGray6)))
+            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        }
+    }
+    
+    // 모드 버튼 뷰
+    struct ModeButton: View {
+        let title: String
+        let isActive: Bool
+        let action: () -> Void
+        let color: Color
+        
+        var body: some View {
+            Button(action: action) {
+                HStack {
+                    Image(systemName: isActive ? "checkmark.circle" : "minus.circle")
+                    Text(title)
+                }
+                .font(.headline)
+                .padding()
+                .frame(maxWidth: .infinity, minHeight: 50)
+                .background(isActive ? color : Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+            }
+            .accessibilityLabel(title)
+        }
+    }
+    
+    // 기능 버튼 뷰
+    struct FunctionButton: View {
+        let title: String
+        let systemImage: String
+        let color: Color
+        let action: () -> Void
+        let isActive: Bool
+        
+        var body: some View {
+            Button(action: action) {
+                Label(title, systemImage: systemImage)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .background(isActive ? color : Color.gray)
+                    .foregroundColor(isActive ? Color.white : Color(.systemGray6))
+                    .cornerRadius(12)
+            }
+            
+            .accessibilityLabel(title)
         }
     }
 }
