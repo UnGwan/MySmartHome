@@ -1,5 +1,6 @@
 
 import subprocess
+import Adafruit_DHT as dht
 from django.shortcuts import render
 
 # views.py
@@ -10,6 +11,24 @@ from gpiozero import LED
 # GPIO 12번 핀에 연결된 LED 객체 생성
 led = LED(12)
 
+
+#온습도 모드
+@csrf_exempt
+def get_temperature_humidity(request):
+    SENSOR =  dht.DHT22
+    PIN = 4
+    humidity, temperature = dht.read_retry(SENSOR, PIN)
+
+    if humidity is not None and temperature is not None:
+        data = {
+            'temperature': temperature,
+            'humidity': humidity,
+        }
+        return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'Failed to retrieve data from sensor'}, status=500)
+
+#서큘레이터 제어
 @csrf_exempt
 def circulator_control(requset):
     key_mapping = {
