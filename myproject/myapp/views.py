@@ -1,6 +1,8 @@
 
 import subprocess
 import Adafruit_DHT as dht
+import smbus2
+import time
 from django.shortcuts import render
 
 # views.py
@@ -10,6 +12,47 @@ from gpiozero import LED
 
 # GPIO 12번 핀에 연결된 LED 객체 생성
 led = LED(12)
+
+
+#체온 측정 모드
+@csrf_exempt
+def get_my_temperature(request):
+    import smbus2
+    
+    MLX90614_I2C_ADDR = 0x5A
+    AMBIENT_TEMP = 0x06
+    OBJECT_TEMP = 0x07
+    
+    def read_word(bus, addr, reg):
+        try:
+            data = bus.read_word_data(addr, reg)
+            return data
+        except Exception as e:
+            print(f"Read word error: {e}")
+            raise
+
+    def read_temp_c(bus, addr, reg):
+        try:
+            raw_temp = read_word(bus, addr, reg)
+            temp = raw_temp * 0.02 - 273.15
+            return temp
+        except Exception as e:
+            print(f"Read temperature error: {e}")
+            raise
+
+    bus = smbus2.SMBus(1)
+    try:
+        a_temp = read_temp_c(bus, MLX90614_I2C_ADDR, AMBIENT_TEMP)
+        object_temp = read_temp_c(bus, MLX90614_I2C_ADDR, OBJECT_TEMP)
+        print(f"Ambient Temp: {round(a_temp, 2)}, Object Temp: {round(object_temp, 2)}")
+        return JsonResponse({'my_temperature': round(object_temp, 2)})
+    except Exception as e:
+        print(f"Error in get_my_temperature: {e}")
+        return JsonResponse({'error': 'Failed to retrieve data from sensor'}, status=500)
+    finally:
+        bus.close()
+
+
 
 
 #온습도 모드
