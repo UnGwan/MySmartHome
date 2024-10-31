@@ -8,11 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		46CD0F602CAFA2460073BAC2 /* secret.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 46CD0F5F2CAFA2460073BAC2 /* secret.xcconfig */; };
+		46E09F362CD24EAF00E656F9 /* countdownBeep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 46E09F342CD24EAF00E656F9 /* countdownBeep.mp3 */; };
+		46E09F372CD24EAF00E656F9 /* finishSound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 46E09F352CD24EAF00E656F9 /* finishSound.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		46CD0F462CAF9F8F0073BAC2 /* MySmartHomeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MySmartHomeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		46CD0F5F2CAFA2460073BAC2 /* secret.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = secret.xcconfig; sourceTree = "<group>"; };
+		46E09F342CD24EAF00E656F9 /* countdownBeep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = countdownBeep.mp3; sourceTree = "<group>"; };
+		46E09F352CD24EAF00E656F9 /* finishSound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = finishSound.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -50,6 +54,8 @@
 		46CD0F3D2CAF9F8F0073BAC2 = {
 			isa = PBXGroup;
 			children = (
+				46E09F342CD24EAF00E656F9 /* countdownBeep.mp3 */,
+				46E09F352CD24EAF00E656F9 /* finishSound.mp3 */,
 				46CD0F5F2CAFA2460073BAC2 /* secret.xcconfig */,
 				46CD0F482CAF9F8F0073BAC2 /* MySmartHomeApp */,
 				46CD0F472CAF9F8F0073BAC2 /* Products */,
@@ -128,6 +134,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46E09F362CD24EAF00E656F9 /* countdownBeep.mp3 in Resources */,
+				46E09F372CD24EAF00E656F9 /* finishSound.mp3 in Resources */,
 				46CD0F602CAFA2460073BAC2 /* secret.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

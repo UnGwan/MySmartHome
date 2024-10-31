@@ -3,6 +3,8 @@ import SwiftUI
 struct FanControlView: View {
     @EnvironmentObject private var viewModel: FanControlViewModel
     @State private var showResetAlert = false // 리셋 경고 알림 상태
+    @State private var showTemperatureSheet = false  // 시트 표시 여부 관리
+    @State private var showAutoControlAlert = false  // 사람 감지 모드 알림 상태
     
     let columns = [
         GridItem(.flexible()),
@@ -36,7 +38,7 @@ struct FanControlView: View {
                             Image(systemName: "minus.circle.fill")
                                 .font(.system(size: 30, weight: .bold))
                                 .foregroundColor(.white)
-                                .frame(width: 60, height: 60) // 동일한 크기 설정
+                                .frame(width: 60, height: 60)
                                 .background(Color.blue)
                                 .clipShape(Circle())
                                 .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
@@ -49,10 +51,10 @@ struct FanControlView: View {
                                 .font(.headline)
                                 .foregroundColor(.gray)
                             Text("\(viewModel.fanSpeed)")
-                                .font(.system(size: 40, weight: .bold)) // 스피드 텍스트 크기 증가
+                                .font(.system(size: 40, weight: .bold))
                                 .foregroundColor(.blue)
                         }
-                        .frame(width: 120) // 텍스트 영역 고정
+                        .frame(width: 120)
                         
                         // 증가 버튼
                         Button(action: { viewModel.increaseSpeed() }) {
@@ -81,11 +83,9 @@ struct FanControlView: View {
                         InfoCard(title: "타이머", value: viewModel.timerSetting, color: .orange)
                         InfoCard(title: "방 온도", value: String(format: "%.1f°C", viewModel.temperature), color: .red)
                         InfoCard(title: "방 습도", value: String(format: "%.1f%%", viewModel.humidity), color: .green)
-                        InfoCard(title: "내 체온", value: String(format: "%.1f°C", viewModel.temperature), color: .pink)
+                        InfoCard(title: "내 체온", value: String(format: "%.1f°C", viewModel.myTemperature), color: .pink)
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(.systemGray6)))
                     .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                     .opacity(viewModel.isFanOn ? 1.0 : 0.0)
                     .transition(.opacity)
@@ -113,13 +113,38 @@ struct FanControlView: View {
                             HStack(spacing: 10) {
                                 ModeButton(title: "온/습도 모드", isActive: viewModel.isSmartMode, action: { viewModel.toggleSmartMode() }, color: .blue)
                                 
-                                ModeButton(title: "체온 모드", isActive: false, action: { }, color: .purple)
+                                ModeButton(title: "사람 감지 모드", isActive: viewModel.isAutoControlMode, action: {
+                                    if !viewModel.isAutoControlMode {
+                                        viewModel.startPersonDetection()
+                                    } else {
+                                        viewModel.stopPersonDetection()
+                                    }
+                                    if viewModel.isAutoControlMode {
+                                        showAutoControlAlert = true
+                                    }
+                                }, color: .orange)
+                                    .alert(isPresented: $showAutoControlAlert) {
+                                        Alert(
+                                            title: Text("사람 감지 모드 활성화"),
+                                            message: Text("\(viewModel.inactivityDuration)분간 자리를 비우시면 \n 서큘레이터는 종료됩니다."),
+                                            dismissButton: .default(Text("확인"))
+                                    )
+                                }
+                                
                             }
                             
                             HStack(spacing: 10) {
-                                FunctionButton(title: "Wind Mode", systemImage: "wind", color: .blue.opacity(0.2), action: { viewModel.cycleWindMode() }, isActive: true)
+                                FunctionButton(title: "모드 변경", systemImage: "wind", color: .blue.opacity(0.2), action: { viewModel.cycleWindMode() }, isActive: true)
+                                    
                                 
-                                FunctionButton(title: "Timer", systemImage: "timer", color: .yellow.opacity(0.2), action: { viewModel.cycleTimer() }, isActive: true)
+                                FunctionButton(title: "체온 측정", systemImage: "wind", color: .red.opacity(0.5), action: {
+                                    showTemperatureSheet = true
+                                }, isActive: true)
+                                .sheet(isPresented: $showTemperatureSheet) {
+                                    TemperatureMeasurementSheet()
+                                }
+                                
+                                FunctionButton(title: "타이머", systemImage: "timer", color: .yellow.opacity(0.2), action: { viewModel.cycleTimer() }, isActive: true)
                             }
                             
                             HStack(spacing: 10) {
@@ -162,7 +187,7 @@ struct FanControlView: View {
             .padding()
         }
         .onAppear {
-            if viewModel.smartModeTimer == nil {
+            if viewModel.smartModeTimer == nil && viewModel.isFanOn  {
                 viewModel.getTempHum()
             }
         }
@@ -226,7 +251,7 @@ struct FanControlView: View {
         var body: some View {
             Button(action: action) {
                 Label(title, systemImage: systemImage)
-                    .font(.headline)
+                    .font(title.count > 3 ? .caption2 : .callout)
                     .padding()
                     .frame(maxWidth: .infinity, minHeight: 50)
                     .background(isActive ? color : Color.gray)
