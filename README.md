@@ -80,23 +80,6 @@ Smart Circulator Control System은 환경 및 사용자 기반 자동화를 목�
 - 사용자 입력 기반의 더 다양한 모드 추가.
 - 실시간 데이터 시각화 기능 개선.
 
-## 기여 방법
-
-1. 저장소를 포크합니다.
-2. 새로운 브랜치를 생성합니다:
-   ```bash
-   git checkout -b feature/새로운기능
-   ```
-3. 변경 사항을 커밋합니다:
-   ```bash
-   git commit -m "새로운 기능 추가"
-   ```
-4. 브랜치를 푸시합니다:
-   ```bash
-   git push origin feature/새로운기능
-   ```
-5. Pull Request를 생성합니다.
-
 
 ## 기록
 
