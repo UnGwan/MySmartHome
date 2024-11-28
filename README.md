@@ -1,6 +1,4 @@
-# MySmartHome
-
-# Smart Circulator Control System
+# MySmartHome (Smart Circulator Control System)
 
 ## 프로젝트 소개
 
