@@ -26,6 +26,7 @@ Smart Circulator Control System은 환경 및 사용자 기반 자동화를 목�
 - **하드웨어**: Raspberry Pi 4, MLX90614, DHT-22, IR 송수신기
 - **백엔드**: Django
 - **프론트엔드**: SwiftUI
+- **OS** : Linux(Raspberry pi 4) , iOS(Client)
 - **기타**: lircd , Adafruit_DHT , smbus2
 
 ## 시스템 아키텍처
